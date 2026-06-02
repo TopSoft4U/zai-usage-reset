@@ -30,7 +30,8 @@ jobs:
           zip -r dist/zai-quota-reset-${{ steps.version.outputs.version }}.zip \
             manifest.json content.js content.css injector.js icons/
 
-      - name: Sign extension for Firefox
+      - name: Submit to AMO for review
+        continue-on-error: true
         run: |
           echo '{"version":{"license":"MIT"},"categories":{"firefox":["other"]}}' > amo-metadata.json
           web-ext sign \
