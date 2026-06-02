@@ -32,12 +32,14 @@ jobs:
 
       - name: Sign extension for Firefox
         run: |
+          echo '{"version":{"license":"MIT"},"categories":{"firefox":["other"]}}' > amo-metadata.json
           web-ext sign \
             --source-dir . \
             --artifacts-dir dist \
             --channel listed \
             --api-key "$AMO_JWT_ISSUER" \
             --api-secret "$AMO_JWT_SECRET" \
+            --amo-metadata amo-metadata.json \
             --timeout 900000
         env:
           AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
