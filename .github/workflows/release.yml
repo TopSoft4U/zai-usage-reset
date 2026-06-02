@@ -13,18 +13,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install web-ext
+        run: npm install -g web-ext
+
       - name: Read version from manifest
         id: version
         run: echo "version=$(jq -r .version manifest.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Package extension
+      - name: Package unsigned zip
         run: |
           mkdir -p dist
           zip -j dist/zai-quota-reset-${{ steps.version.outputs.version }}.zip \
             manifest.json content.js content.css injector.js
 
+      - name: Sign extension for Firefox
+        run: |
+          web-ext sign \
+            --source-dir . \
+            --artifacts-dir dist \
+            --channel unlisted \
+            --api-key "$AMO_JWT_ISSUER" \
+            --api-secret "$AMO_JWT_SECRET"
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.zip
+          files: |
+            dist/*.zip
+            dist/*.xpi
           generate_release_notes: true
