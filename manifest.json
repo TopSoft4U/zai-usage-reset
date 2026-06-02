@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "z.ai Quota Reset Timer",
+  "version": "1.0.2",
+  "description": "Shows quota reset times in local time on z.ai subscription page",
+  "permissions": [],
+  "host_permissions": ["https://api.z.ai/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://z.ai/manage-apikey/subscription*"],
+      "js": ["injector.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://z.ai/manage-apikey/subscription*"],
+      "js": ["content.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content.js"],
+      "matches": ["https://z.ai/*"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zai-quota-reset@local"
+    }
+  }
+}
