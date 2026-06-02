@@ -15,19 +15,22 @@ This extension intercepts the quota API response and adds a countdown bar to eac
 - Color coded progress: red = long wait, yellow = halfway, green = almost reset
 - Auto-clicks the "Usage" tab when you navigate to the subscription page
 
+## Compatibility
+
+This was only tested on the legacy pro plan with 5-hour and monthly reset cycles. Plans with weekly resets or different quota structures have not been tested and may not display correctly.
+
 ## Install
 
-Download the latest `.zip` from [Releases](https://github.com/TopSoft4U/zai-usage-reset/releases).
+**Firefox (signed):**
 
-**Firefox:**
-1. Go to `about:debugging#/runtime/this-firefox`
-2. Click "Load Temporary Add-on"
-3. Select any file from the extracted zip
+Install from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/zai-quota-reset-timer/) or download the `.xpi` from [Releases](https://github.com/TopSoft4U/zai-usage-reset/releases).
 
 **Chrome:**
-1. Go to `chrome://extensions`
-2. Enable "Developer mode"
-3. Click "Load unpacked" and select the extracted folder
+1. Download the `.zip` from [Releases](https://github.com/TopSoft4U/zai-usage-reset/releases)
+2. Extract the zip
+3. Go to `chrome://extensions`
+4. Enable "Developer mode"
+5. Click "Load unpacked" and select the extracted folder
 
 ## Build
 
@@ -38,4 +41,4 @@ git tag v1.0.0
 git push --tags
 ```
 
-The workflow packages the extension files into a zip and attaches it to a GitHub Release.
+The workflow packages the extension files into a zip, signs the `.xpi` via AMO, and attaches both to a GitHub Release.

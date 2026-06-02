@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d2d2d"/>
+      <stop offset="100%" stop-color="#2d2d2d"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg4)"/>
+  <!-- Stopwatch top button -->
+  <rect x="60" y="12" width="8" height="10" rx="2" fill="#7c9bff"/>
+  <!-- Stopwatch ring -->
+  <circle cx="64" cy="60" r="34" fill="none" stroke="#7c9bff" stroke-width="3.5"/>
+  <!-- Inner tick marks -->
+  <line x1="64" y1="30" x2="64" y2="36" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="64" y1="84" x2="64" y2="90" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="34" y1="60" x2="40" y2="60" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="88" y1="60" x2="94" y2="60" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Filled arc showing elapsed time -->
+  <circle cx="64" cy="60" r="26" fill="none" stroke="#4caf50" stroke-width="6" stroke-linecap="round" opacity="0.4" stroke-dasharray="114 163" transform="rotate(-90 64 60)"/>
+  <!-- Single hand pointing to ~10 o'clock -->
+  <line x1="64" y1="60" x2="49" y2="42" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="64" cy="60" r="3.5" fill="#fff"/>
+  <!-- z.ai label -->
+  <text x="64" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" letter-spacing="1" fill="#ffffff">Z.ai</text>
+</svg>
