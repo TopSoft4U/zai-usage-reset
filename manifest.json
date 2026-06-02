@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "z.ai Quota Reset Timer",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Shows quota reset times in local time on z.ai subscription page",
   "homepage_url": "https://github.com/TopSoft4U/zai-usage-reset",
   "author": "TopSoft4U",
@@ -34,9 +34,7 @@
     "gecko": {
       "id": "zai-quota-reset@topsoft4u.com",
       "data_collection_permissions": {
-        "required": ["none"],
-        "pings_allowed": false,
-        "data_allowed": false
+        "required": ["none"]
       }
     }
   }
