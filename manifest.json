@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "z.ai Quota Reset Timer",
-  "version": "1.2.0",
-  "description": "Shows quota reset times in local time on z.ai subscription page",
+  "version": "1.3.0",
+  "description": "Shows quota reset times in local time on the z.ai usage page",
   "homepage_url": "https://github.com/TopSoft4U/zai-usage-reset",
   "author": "TopSoft4U",
   "icons": {
@@ -13,12 +13,12 @@
   "host_permissions": ["https://api.z.ai/*"],
   "content_scripts": [
     {
-      "matches": ["https://z.ai/manage-apikey/subscription*"],
+      "matches": ["https://z.ai/manage-apikey/coding-plan/personal/usage*"],
       "js": ["injector.js"],
       "run_at": "document_start"
     },
     {
-      "matches": ["https://z.ai/manage-apikey/subscription*"],
+      "matches": ["https://z.ai/manage-apikey/coding-plan/personal/usage*"],
       "js": ["content.js"],
       "world": "MAIN",
       "run_at": "document_start"

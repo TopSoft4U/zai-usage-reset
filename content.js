@@ -5,27 +5,14 @@
   const STYLE_ID = "zai-reset-timer-style";
   let countdownInterval = null;
 
-  function clickUsageTab() {
-    const tab = document.querySelector('[data-node-key="usage"] .ant-tabs-tab-btn');
-    if (!tab) return false;
-    if (tab.getAttribute("aria-selected") === "true") return true;
-    tab.click();
-    return true;
-  }
-
-  let tabAttempts = 0;
-  const tabPoll = setInterval(() => {
-    if (clickUsageTab() || ++tabAttempts > 50) clearInterval(tabPoll);
-  }, 300);
-
   function formatLocalTime(timestampMs) {
-    return new Date(timestampMs).toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+    const d = new Date(timestampMs);
+    const pad = (value) => String(value).padStart(2, "0");
+    return [
+      d.getFullYear(),
+      pad(d.getMonth() + 1),
+      pad(d.getDate()),
+    ].join("-") + ` ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   function formatCountdown(timestampMs) {
@@ -39,13 +26,7 @@
     return `${h}h ${m}m ${s}s`;
   }
 
-  function barColor(pct) {
-    if (pct > 80) return "#4caf50";
-    if (pct > 50) return "#ff9800";
-    return "#f44336";
-  }
-
-  // Peak hours: 14:00–18:00 UTC+8 daily
+  // Peak hours: 14:00-18:00 UTC+8 daily
   // Peak: 3x, Off-peak: 2x (promo: 1x through June 2026)
   const PROMO_END = new Date("2026-07-01T00:00:00+08:00").getTime();
 
@@ -54,7 +35,7 @@
     d.setUTCHours(hour - 8, 0, 0, 0);
     return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
   }
-  const PEAK_LOCAL = `${utc8ToLocal(14)}–${utc8ToLocal(18)}`;
+  const PEAK_LOCAL = `${utc8ToLocal(14)}-${utc8ToLocal(18)}`;
 
   function getMultiplier() {
     const now = new Date();
@@ -75,49 +56,42 @@
     style.textContent = `
       .zai-reset-bar {
         position: relative;
-        margin-top: auto;
-        padding-top: 4px;
-        height: 28px;
-        border-radius: 6px;
-        overflow: hidden;
+        margin-top: 18px;
+        min-height: 24px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
-      .zai-reset-track {
-        position: absolute;
-        inset: 4px 0 0 0;
-        background: rgba(10, 10, 25, 0.7);
-        border-radius: 6px;
-      }
-      .zai-reset-fill {
-        height: 100%;
-        opacity: 0.45;
-        transition: width 1s linear, background-color 5s linear;
-      }
-      .zai-reset-overlay {
-        position: absolute;
-        inset: 4px 0 0 0;
+      .zai-reset-meta {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        gap: 8px;
+        gap: 16px;
+        min-width: 0;
         font-size: 14px;
-        font-weight: 600;
-        color: #fff;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6);
+        line-height: 22px;
+        color: #c3c4cc;
         pointer-events: none;
       }
-      .zai-reset-overlay .zai-reset-label {
+      .zai-reset-meta .zai-reset-label {
         font-weight: 400;
-        opacity: 0.85;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .zai-reset-meta .zai-countdown {
+        flex: 0 0 auto;
+        color: #ffffff;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 500;
       }
       #zai-multiplier-badge {
         position: absolute;
-        top: 24px;
-        right: 24px;
+        top: 18px;
+        right: 22px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 6px;
         z-index: 10;
         cursor: default;
@@ -191,9 +165,10 @@
   }
 
   function findCardByText(searchText) {
+    const searchTexts = Array.isArray(searchText) ? searchText : [searchText];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
-      if (!walker.currentNode.textContent.includes(searchText)) continue;
+      if (!searchTexts.some((text) => walker.currentNode.textContent.includes(text))) continue;
       let el = walker.currentNode.parentElement;
       for (let i = 0; i < 10 && el; i++) {
         const style = window.getComputedStyle(el);
@@ -210,11 +185,16 @@
   }
 
   const MAPPING = [
-    { type: "TOKENS_LIMIT", search: "5 Hours Quota", barId: "zai-reset-5h", cycleDuration: 5 * 3600000 },
-    { type: "TIME_LIMIT", search: "Monthly Web Search", barId: "zai-reset-monthly", cycleDuration: 30 * 86400000 },
+    { type: "TOKENS_LIMIT", search: ["5 Hours Quota"], barId: "zai-reset-5h", cycleDuration: 5 * 3600000 },
+    {
+      type: "TIME_LIMIT",
+      search: ["Total Monthly Web Search / Reader / Zread Quota", "Monthly Web Search"],
+      barId: "zai-reset-monthly",
+      cycleDuration: 30 * 86400000,
+    },
   ];
 
-  // Cached DOM refs per bar — avoids querying every second
+  // Cached DOM refs per bar to avoid querying every second.
   const barRefs = {};
 
   function createResetBar(id) {
@@ -222,50 +202,57 @@
     bar.className = "zai-reset-bar";
     bar.id = id;
     bar.innerHTML = `
-      <div class="zai-reset-track"><div class="zai-reset-fill"></div></div>
-      <div class="zai-reset-overlay">
+      <div class="zai-reset-meta">
         <span class="zai-reset-label"></span>
         <span class="zai-countdown"></span>
       </div>
     `;
     barRefs[id] = {
-      fill: bar.querySelector(".zai-reset-fill"),
       countdown: bar.querySelector(".zai-countdown"),
       label: bar.querySelector(".zai-reset-label"),
     };
     return bar;
   }
 
-  function updateBar(barId, resetMs, cycleDurationMs) {
+  function hideNativeResetTime(card) {
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      if (!walker.currentNode.textContent.includes("Reset Time:")) continue;
+      let el = walker.currentNode.parentElement;
+      while (el && el.parentElement !== card) {
+        el = el.parentElement;
+      }
+      if (!el || el.classList.contains("zai-reset-bar") || el.id === "zai-reset-monthly") continue;
+      el.style.display = "none";
+      return true;
+    }
+    return false;
+  }
+
+  function updateBar(barId, resetMs) {
     const refs = barRefs[barId];
     if (!refs) return;
     if (!resetMs) {
-      refs.fill.style.width = "0%";
-      refs.fill.style.backgroundColor = "transparent";
       refs.countdown.textContent = "";
-      refs.label.textContent = "Quota not started — send an API request to begin countdown";
+      refs.label.textContent = "Quota not started - send an API request to begin countdown";
       refs.label.style.opacity = "0.6";
       refs.label.style.fontStyle = "italic";
       return;
     }
     refs.label.style.opacity = "";
     refs.label.style.fontStyle = "";
-    const remaining = Math.max(0, resetMs - Date.now());
-    const elapsed = cycleDurationMs - remaining;
-    const pct = Math.min(100, Math.max(0, (elapsed / cycleDurationMs) * 100));
-    refs.fill.style.width = `${pct}%`;
-    refs.fill.style.backgroundColor = barColor(pct);
     refs.countdown.textContent = formatCountdown(resetMs);
-    refs.label.textContent = `Resets ${formatLocalTime(resetMs)}`;
+    refs.label.textContent = `Reset Time: ${formatLocalTime(resetMs)} local`;
   }
 
-  let lastMultiplierState = null;
+  let lastMultiplierState = "";
   function updateMultiplierBadge() {
     const badge = document.getElementById("zai-multiplier-badge");
     if (!badge) return;
     const m = getMultiplier();
-    if (m.isPeak === lastMultiplierState) return;
-    lastMultiplierState = m.isPeak;
+    const nextState = `${m.isPeak}:${m.label}`;
+    if (nextState === lastMultiplierState) return;
+    lastMultiplierState = nextState;
     const text = badge.querySelector(".zai-badge-text");
     if (text) text.textContent = m.label;
     badge.className = m.isPeak ? "peak" : "offpeak";
@@ -280,23 +267,24 @@
   function injectBars(limits) {
     injectStyles();
     let allInjected = true;
-    for (const { type, search, barId, cycleDuration } of MAPPING) {
+    for (const { type, search, barId } of MAPPING) {
       const limit = limits.find((l) => l.type === type);
       if (!limit) continue;
       const resetMs = limit.nextResetTime || null;
+      const card = findCardByText(search);
+      if (type === "TIME_LIMIT" && card) {
+        hideNativeResetTime(card);
+      }
       if (document.getElementById(barId)) {
-        updateBar(barId, resetMs, cycleDuration);
+        updateBar(barId, resetMs);
         continue;
       }
-      const card = findCardByText(search);
       if (!card) { allInjected = false; continue; }
-      card.style.display = "flex";
-      card.style.flexDirection = "column";
       card.appendChild(createResetBar(barId));
-      updateBar(barId, resetMs, cycleDuration);
+      updateBar(barId, resetMs);
     }
 
-    // Multiplier badge on 5h quota card
+    // Multiplier badge on 5h quota card.
     if (!document.getElementById("zai-multiplier-badge")) {
       const quotaCard = findCardByText("5 Hours Quota");
       if (quotaCard) {
@@ -317,9 +305,9 @@
 
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
-      for (const { type, barId, cycleDuration } of MAPPING) {
+      for (const { type, barId } of MAPPING) {
         const limit = limits.find((l) => l.type === type);
-        if (limit) updateBar(barId, limit.nextResetTime || null, cycleDuration);
+        if (limit) updateBar(barId, limit.nextResetTime || null);
       }
       updateMultiplierBadge();
     }, 1000);
